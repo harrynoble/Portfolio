@@ -8,7 +8,7 @@
 <title>Harry Noble — Web Developer & Designer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:opsz,wght@14..32,500&display=swap" rel="stylesheet" />
 <style>
   :root {
     --bg: #050505;
@@ -157,7 +157,7 @@
   .resume-btn svg { width: 18px; height: 18px; transition: transform .3s var(--ease-smooth); }
   .resume-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); box-shadow: 0 16px 34px -18px rgba(0,68,255,.55); }
   .resume-btn:hover svg { transform: translateY(2px); }
-  .resume-btn:active { transform: scale(.96); }
+  .resume-btn:active { translate: 0 1px; }
   .form-status { margin-top: 16px; font-family: 'Archivo', sans-serif; font-size: 14px; line-height: 1.5; color: var(--muted); }
   .form-status:empty { display: none; }
   .form-status.ok, .form-status.err { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 12px; animation: statusIn .35s cubic-bezier(.16,1,.3,1); }
@@ -404,7 +404,7 @@
   input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,68,255,.16); }
   /* tactile press feedback (declared last so it wins while pressed) */
   .btn:active, .btn-send:active, .nav-links button:active, .pill-nav button:active,
-  .theme-toggle:active, .socials a:active, .card-expand:active, .proj-close:active { transform: scale(.94); }
+  .theme-toggle:active, .socials a:active, .card-expand:active, .proj-close:active { translate: 0 1px; }
   /* reveal entrance: opacity + transform animate together (kills the instant-pop flash); hover props kept */
   .reveal { transition: opacity .95s var(--ease-smooth), transform .95s var(--ease-smooth), color .35s var(--ease-smooth), background-color .35s var(--ease-smooth), background .35s var(--ease-smooth), border-color .35s var(--ease-smooth), box-shadow .35s var(--ease-smooth); }
   /* currently building */
@@ -513,6 +513,111 @@
   .featured-video { margin-top: 36px; border-radius: 22px; overflow: hidden; border: 1px solid var(--border); background: var(--card); box-shadow: 0 40px 100px -50px rgba(0,0,0,.6); }
   .featured-video video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 22px; }
   @media (max-width: 600px){ .featured-video { margin-top: 26px; border-radius: 16px; } .featured-video video { border-radius: 16px; } }
+  /* shiny CTA (Learn more) */
+  @property --gradient-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+  @property --gradient-angle-offset { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+  @property --gradient-percent { syntax: "<percentage>"; initial-value: 5%; inherits: false; }
+  @property --gradient-shine { syntax: "<color>"; initial-value: white; inherits: false; }
+  .featured-cta { margin-top: 34px; display: flex; justify-content: center; }
+  .shiny-cta {
+    --shiny-cta-bg: #000000; --shiny-cta-bg-subtle: #1a1818; --shiny-cta-fg: #ffffff;
+    --shiny-cta-highlight: blue; --shiny-cta-highlight-subtle: #8484ff;
+    --animation: gradient-angle linear infinite; --duration: 3s; --shadow-size: 2px;
+    --transition: 800ms cubic-bezier(0.25, 1, 0.5, 1);
+    isolation: isolate; position: relative; overflow: hidden; cursor: pointer; outline-offset: 4px;
+    padding: 1.25rem 2.5rem; font-family: "Inter", sans-serif; font-size: 1.125rem;
+    line-height: 1.2; font-weight: 500;
+    border: 1px solid transparent; border-radius: 360px; color: var(--shiny-cta-fg);
+    background: linear-gradient(var(--shiny-cta-bg), var(--shiny-cta-bg)) padding-box,
+      conic-gradient(from calc(var(--gradient-angle) - var(--gradient-angle-offset)), transparent, var(--shiny-cta-highlight) var(--gradient-percent), var(--gradient-shine) calc(var(--gradient-percent) * 2), var(--shiny-cta-highlight) calc(var(--gradient-percent) * 3), transparent calc(var(--gradient-percent) * 4)) border-box;
+    box-shadow: inset 0 0 0 1px var(--shiny-cta-bg-subtle);
+    transition: var(--transition); transition-property: --gradient-angle-offset, --gradient-percent, --gradient-shine;
+  }
+  .shiny-cta::before, .shiny-cta::after, .shiny-cta span::before {
+    content: ""; pointer-events: none; position: absolute; inset-inline-start: 50%; inset-block-start: 50%; translate: -50% -50%; z-index: -1;
+  }
+  .shiny-cta:active { translate: 0 1px; }
+  .shiny-cta::before {
+    --size: calc(100% - var(--shadow-size) * 3); --position: 2px; --space: calc(var(--position) * 2);
+    width: var(--size); height: var(--size);
+    background: radial-gradient(circle at var(--position) var(--position), white calc(var(--position) / 4), transparent 0) padding-box;
+    background-size: var(--space) var(--space); background-repeat: space;
+    mask-image: conic-gradient(from calc(var(--gradient-angle) + 45deg), black, transparent 10% 90%, black);
+    border-radius: inherit; opacity: 0.4; z-index: -1;
+  }
+  .shiny-cta::after {
+    --animation: shimmer linear infinite; width: 175%; aspect-ratio: 1;
+    background: linear-gradient(-50deg, var(--shiny-cta-highlight), var(--shiny-cta-highlight-subtle) 50%, var(--shiny-cta-highlight) 75%);
+    -webkit-mask-image: none; mask-image: none; opacity: 0;
+    transition: opacity .55s cubic-bezier(.22,1,.36,1);
+  }
+  .shiny-cta span { z-index: 1; position: relative; }
+  .shiny-cta span::before {
+    --size: calc(100% + 1rem); width: var(--size); height: var(--size);
+    box-shadow: inset 0 -1ex 2rem 4px var(--shiny-cta-highlight); opacity: 0;
+    transition: opacity var(--transition); animation: calc(var(--duration) * 1.5) breathe linear infinite; display: none;
+  }
+  .shiny-cta, .shiny-cta::before, .shiny-cta::after {
+    animation: var(--animation) var(--duration), var(--animation) calc(var(--duration) / 0.4) reverse paused;
+    animation-composition: add;
+  }
+  .shiny-cta:is(:hover, :focus-visible) { --gradient-percent: 20%; --gradient-angle-offset: 95deg; --gradient-shine: var(--shiny-cta-highlight-subtle); }
+  .shiny-cta:is(:hover, :focus-visible), .shiny-cta:is(:hover, :focus-visible)::before, .shiny-cta:is(:hover, :focus-visible)::after { animation-play-state: running; }
+  .shiny-cta:is(:hover, :focus-visible) span::before { opacity: 1; }
+  .shiny-cta:is(:hover, :focus-visible)::after { opacity: 0.92; }
+  @keyframes gradient-angle { to { --gradient-angle: 360deg; } }
+  @keyframes shimmer { to { rotate: 360deg; } }
+  @keyframes breathe { from, to { scale: 1; } 50% { scale: 1.2; } }
+  @media (max-width: 600px){ .featured-cta { margin-top: 26px; } .shiny-cta { padding: 1rem 2rem; font-size: 1rem; } }
+  /* light-mode variant of the Learn more button */
+  :root[data-theme="light"] .shiny-cta {
+    --shiny-cta-bg: #ffffff; --shiny-cta-bg-subtle: #e7e7f0; --shiny-cta-fg: #0c0c16;
+    --shiny-cta-highlight: #0044ff; --shiny-cta-highlight-subtle: #7f9bff;
+    --gradient-shine: #9fb4ff;
+    box-shadow: inset 0 0 0 1px var(--shiny-cta-bg-subtle), 0 10px 30px -16px rgba(0,68,255,.4);
+  }
+  :root[data-theme="light"] .shiny-cta::before {
+    background-image: radial-gradient(circle at var(--position) var(--position), rgba(10,18,70,.6) calc(var(--position) / 4), transparent 0);
+    opacity: .3;
+  }
+  :root[data-theme="light"] .shiny-cta:is(:hover, :focus-visible) { color: #ffffff; }
+  /* liquid-metal GitHub button (faithful SVG-gradient port) */
+  .lq-btn{ position:relative; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; isolation:isolate; text-decoration:none; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .lq-defs{ position:absolute; pointer-events:none; }
+  .lq-outerglow{ position:absolute; inset:-6px; border-radius:16px; z-index:0; overflow:hidden; filter:blur(19px); opacity:.7; pointer-events:none; }
+  .lq-clip{ position:absolute; inset:0; overflow:hidden; border-radius:16px; }
+  .lq-darkblur{ position:absolute; inset:2px; border-radius:12px; background:#010128; filter:blur(7px); opacity:.85; z-index:1; pointer-events:none; }
+  .lq-face{ position:absolute; inset:0; border-radius:12px; overflow:hidden; z-index:2; border:2px solid rgba(255,255,255,.16); pointer-events:none; box-shadow: inset 0 0 7px rgba(255,255,255,.30), inset 0 0 1px rgba(255,255,255,.6); }
+  .lq-black{ position:absolute; inset:0; background:#000; }
+  .lq-layer{ position:absolute; pointer-events:none; }
+  .lq-svg{ width:100%; height:100%; display:block; }
+  .lq-hi{ position:absolute; left:50%; top:54%; transform:translate(-50%,-50%); width:72%; height:46%; border-radius:12px; background:#000066; filter:blur(15px); z-index:1; }
+  .lq-label{ position:relative; z-index:3; display:inline-flex; align-items:center; gap:10px; padding:13px 26px; color:#fff; font-weight:600; font-size:1rem; letter-spacing:-.01em; white-space:nowrap; text-shadow:0 1px 7px rgba(0,0,30,.6); }
+  .lq-label svg{ width:20px; height:20px; flex:none; }
+  .lq-btn:active{ transform:translateY(1px); }
+  @media (prefers-reduced-motion: reduce){ .lq-defs animate, .lq-defs animateTransform{ display:none; } }
+  /* tactile click "pop" on every interactive element — uses the independent `scale`
+     property so it layers on top of each element's hover lift (no jump) and leaves
+     all glow / border / gradient effects completely untouched */
+  @keyframes press-pop { 0% { scale: 1; } 38% { scale: .95; } 72% { scale: 1.008; } 100% { scale: 1; } }
+  .is-pressed { animation: press-pop .46s cubic-bezier(.4,0,.25,1) both; }
+  @media (prefers-reduced-motion: reduce) { .is-pressed { animation: none; } }
+  /* header can never overflow on any device: nav + toggle stay fixed, brand name
+     ellipsizes only when there is genuinely no room (normal phones unaffected) */
+  .glass-bar { flex-wrap: nowrap; }
+  .brand { min-width: 0; flex: 0 1 auto; overflow: hidden; }
+  .brand-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nav-links { flex: none; }
+  /* tiny / foldable phones */
+  @media (max-width: 360px){
+    .brand-name { font-size: 12px; }
+    .brand-logo { width: 24px; height: 24px; }
+    .nav-links button { padding: 5px 5px; font-size: 11px; }
+    .theme-switch { --toggle-size: 8.5px; margin-left: 2px; }
+    .glass-bar { padding: 7px 6px 7px 10px; gap: 5px; }
+    .wrap { padding: 0 13px; }
+    .tagline { font-size: clamp(30px, 13.5vw, 60px); }
+  }
 </style>
 </head>
 <body class="grain">
@@ -576,6 +681,9 @@
       <div class="featured-video reveal" style="transition-delay:.12s">
         <video src="assets/video.mp4" autoplay muted loop playsinline preload="auto"></video>
       </div>
+      <div class="featured-cta reveal" style="transition-delay:.18s">
+        <button class="shiny-cta" data-magnetic aria-label="Learn more about PolicyLens" onclick="scrollToId('work');setTimeout(function(){openProject(0);},600);"><span>Learn more</span></button>
+      </div>
     </div>
   </section>
 
@@ -615,7 +723,7 @@
     <div class="wrap">
       <div class="sec-head reveal"><h2><span class="live-dot" aria-hidden="true"></span>Currently Building</h2><span class="line"></span></div>
       <div class="building-card reveal" style="transition-delay:.06s">
-        <blockquote class="building-quote">"I'm currently building an interactive cellular automata playground featuring Rule 130, Rule 193, and Conway's Game of Life, designed to help users explore emergent behaviour through real-time simulations and custom configurations."</blockquote>
+        <blockquote class="building-quote">"I'm currently building an interactive cellular automata playground featuring all 256 elementary rules and Conway's Game of Life."</blockquote>
       </div>
     </div>
   </section>
@@ -697,9 +805,7 @@
       <figcaption class="proj-shot-cap" id="po-image-cap"></figcaption>
     </figure>
     <div class="proj-actions">
-      <a class="btn btn-primary" id="po-github" data-magnetic target="_blank" rel="noreferrer">View on GitHub
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.32 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.02 10.02 0 0 0 22 12.25C22 6.58 17.52 2 12 2Z"/></svg>
-      </a>
+      <a class="lq-btn" id="po-github" data-magnetic target="_blank" rel="noreferrer" aria-label="View on GitHub"><svg class="lq-defs" width="0" height="0" aria-hidden="true"><defs><radialGradient id="liqGrad" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"><animateTransform attributeName="gradientTransform" type="translate" additive="sum" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="287.5 280;126.5 418.5;264.5 339.5;860.5 420;264.5 339.5;126.5 418.5;287.5 280"/><animateTransform attributeName="gradientTransform" type="rotate" additive="sum" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="-29.0546;-64.756;-42.3022;-153.984;-42.3022;-64.756;-29.0546"/><animateTransform attributeName="gradientTransform" type="scale" additive="sum" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="689.807 1000;533.444 773.324;946.451 1372.05;957.528 1388.11;946.451 1372.05;533.444 773.324;689.807 1000"/><stop offset="0" stop-color="#FFFFFF"><animate attributeName="offset" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="0;0;0;0.109375;0;0;0"/><animate attributeName="stop-color" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="#FFFFFF;#FFFFFF;#FFFFFF;#0B06FC;#FFFFFF;#FFFFFF;#FFFFFF"/></stop><stop offset="0.188423" stop-color="#1E10C5"><animate attributeName="offset" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="0.188423;0.104167;0.188423;0.171875;0.188423;0.104167;0.188423"/><animate attributeName="stop-color" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="#1E10C5;#C5C1EA;#1E10C5;#1E10C5;#1E10C5;#C5C1EA;#1E10C5"/></stop><stop offset="0.260417" stop-color="#9089E2"><animate attributeName="offset" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="0.260417;0.182292;0.307292;0.260417;0.307292;0.182292;0.260417"/><animate attributeName="stop-color" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="#9089E2;#1403DE;#FFFFFF;#1403DE;#FFFFFF;#1403DE;#9089E2"/></stop><stop offset="0.328792" stop-color="#FCFCFE"><animate attributeName="offset" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="0.328792;0.28125;0.328792;0.328792;0.328792;0.28125;0.328792"/><animate attributeName="stop-color" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="#FCFCFE;#FFFFFF;#FCFCFE;#FCFCFE;#FCFCFE;#FFFFFF;#FCFCFE"/></stop><stop offset="0.328892" stop-color="#F9F9FD"><animate attributeName="offset" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="0.328892;0.328792;0.328892;0.328892;0.328892;0.328792;0.328892"/><animate attributeName="stop-color" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="#F9F9FD;#FCFCFE;#F9F9FD;#F9F9FD;#F9F9FD;#FCFCFE;#F9F9FD"/></stop><stop offset="0.328992" stop-color="#FFFFFF"><animate attributeName="offset" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="0.328992;0.328892;0.442708;0.328992;0.442708;0.328892;0.328992"/><animate attributeName="stop-color" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="#FFFFFF;#F9F9FD;#C1BEEB;#FFFFFF;#C1BEEB;#F9F9FD;#FFFFFF"/></stop><stop offset="0.442708" stop-color="#B2B8E7"><animate attributeName="offset" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="0.442708;0.453125;0.537556;0.442708;0.537556;0.453125;0.442708"/><animate attributeName="stop-color" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="#B2B8E7;#B2B8E7;#290ECB;#B2B8E7;#290ECB;#B2B8E7;#B2B8E7"/></stop><stop offset="0.537556" stop-color="#0E2DCB"><animate attributeName="offset" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="0.537556;0.515625;0.631738;0.515625;0.631738;0.515625;0.537556"/><animate attributeName="stop-color" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="#0E2DCB;#0E2DCB;#FFFFFF;#0E2DCB;#FFFFFF;#0E2DCB;#0E2DCB"/></stop><stop offset="0.631738" stop-color="#FFFFFF"><animate attributeName="offset" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="0.631738;0.631738;0.725645;0.631738;0.725645;0.631738;0.631738"/><animate attributeName="stop-color" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="#FFFFFF;#FFFFFF;#3F4CC0;#FFFFFF;#3F4CC0;#FFFFFF;#FFFFFF"/></stop><stop offset="0.725645" stop-color="#0017E9"><animate attributeName="offset" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="0.725645;0.692708;0.817779;0.692708;0.817779;0.692708;0.725645"/><animate attributeName="stop-color" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="#0017E9;#0017E9;#4743EF;#0017E9;#4743EF;#0017E9;#0017E9"/></stop><stop offset="0.817779" stop-color="#4743EF"><animate attributeName="offset" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="0.817779;0.75;0.84375;0.817708;0.84375;0.75;0.817779"/><animate attributeName="stop-color" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="#4743EF;#B6BAF6;#7D7BF4;#4743EF;#7D7BF4;#B6BAF6;#4743EF"/></stop><stop offset="0.84375" stop-color="#7D7BF4"><animate attributeName="offset" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="0.84375;0.817708;0.90569;0.869792;0.90569;0.817708;0.84375"/><animate attributeName="stop-color" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="#7D7BF4;#4743EF;#FFFFFF;#7D7BF4;#FFFFFF;#4743EF;#7D7BF4"/></stop><stop offset="0.90569" stop-color="#FFFFFF"><animate attributeName="offset" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="0.90569;0.869792;1;1;1;0.869792;0.90569"/><animate attributeName="stop-color" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="#FFFFFF;#7D7BF4;#0B06FC;#0B06FC;#0B06FC;#7D7BF4;#FFFFFF"/></stop><stop offset="1" stop-color="#0B06FC"><animate attributeName="offset" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="1;1;1;1;1;1;1"/><animate attributeName="stop-color" dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.166667;0.333333;0.5;0.666667;0.833333;1" values="#0B06FC;#FFFFFF;#0B06FC;#0B06FC;#0B06FC;#FFFFFF;#0B06FC"/></stop></radialGradient></defs></svg><span class="lq-outerglow" aria-hidden="true"><span class="lq-clip"><span class="lq-layer" style="width:443px;height:121px;top:50%;left:50%;transform:translate(-50%,-50%);mix-blend-mode:difference;"><svg class="lq-svg" viewBox="0 0 1030 280" preserveAspectRatio="none"><rect width="1030" height="280" rx="140" fill="url(#liqGrad)"/></svg></span><span class="lq-layer" style="width:443px;height:121px;top:50%;left:50%;transform:translate(-50%,-50%) rotate(164.971deg);mix-blend-mode:difference;"><svg class="lq-svg" viewBox="0 0 1030 280" preserveAspectRatio="none"><rect width="1030" height="280" rx="140" fill="url(#liqGrad)"/></svg></span><span class="lq-layer" style="width:443px;height:121px;top:50%;left:50%;transform:translate(-53%,-53%) rotate(-11.61deg);mix-blend-mode:difference;"><svg class="lq-svg" viewBox="0 0 1030 280" preserveAspectRatio="none"><rect width="1030" height="280" rx="140" fill="url(#liqGrad)"/></svg></span><span class="lq-layer" style="width:756px;height:207px;top:50%;left:50%;transform:translate(-50%,-57%) rotate(-179.012deg);mix-blend-mode:difference;"><svg class="lq-svg" viewBox="0 0 1030 280" preserveAspectRatio="none"><rect width="1030" height="280" rx="140" fill="url(#liqGrad)"/></svg></span><span class="lq-layer" style="width:756px;height:207px;top:50%;left:50%;transform:translate(-57%,-50%) rotate(-29.722deg);mix-blend-mode:difference;"><svg class="lq-svg" viewBox="0 0 1030 280" preserveAspectRatio="none"><rect width="1030" height="280" rx="140" fill="url(#liqGrad)"/></svg></span><span class="lq-layer" style="width:756px;height:207px;top:50%;left:50%;transform:translate(-62%,-24%) rotate(160.227deg);mix-blend-mode:difference;"><svg class="lq-svg" viewBox="0 0 1030 280" preserveAspectRatio="none"><rect width="1030" height="280" rx="140" fill="url(#liqGrad)"/></svg></span><span class="lq-layer" style="width:756px;height:207px;top:50%;left:50%;transform:translate(-67%,-29%) rotate(180deg);mix-blend-mode:hard-light;"><svg class="lq-svg" viewBox="0 0 1030 280" preserveAspectRatio="none"><rect width="1030" height="280" rx="140" fill="url(#liqGrad)"/></svg></span></span></span><span class="lq-darkblur" aria-hidden="true"></span><span class="lq-face" aria-hidden="true"><span class="lq-black"></span><span class="lq-layer" style="width:443px;height:121px;top:50%;left:50%;transform:translate(-50%,-50%);mix-blend-mode:difference;"><svg class="lq-svg" viewBox="0 0 1030 280" preserveAspectRatio="none"><rect width="1030" height="280" rx="140" fill="url(#liqGrad)"/></svg></span><span class="lq-layer" style="width:443px;height:121px;top:50%;left:50%;transform:translate(-50%,-50%) rotate(164.971deg);mix-blend-mode:difference;"><svg class="lq-svg" viewBox="0 0 1030 280" preserveAspectRatio="none"><rect width="1030" height="280" rx="140" fill="url(#liqGrad)"/></svg></span><span class="lq-layer" style="width:443px;height:121px;top:50%;left:50%;transform:translate(-53%,-53%) rotate(-11.61deg);mix-blend-mode:difference;"><svg class="lq-svg" viewBox="0 0 1030 280" preserveAspectRatio="none"><rect width="1030" height="280" rx="140" fill="url(#liqGrad)"/></svg></span><span class="lq-layer" style="width:756px;height:207px;top:50%;left:50%;transform:translate(-50%,-57%) rotate(-179.012deg);mix-blend-mode:difference;"><svg class="lq-svg" viewBox="0 0 1030 280" preserveAspectRatio="none"><rect width="1030" height="280" rx="140" fill="url(#liqGrad)"/></svg></span><span class="lq-layer" style="width:756px;height:207px;top:50%;left:50%;transform:translate(-57%,-50%) rotate(-29.722deg);mix-blend-mode:difference;"><svg class="lq-svg" viewBox="0 0 1030 280" preserveAspectRatio="none"><rect width="1030" height="280" rx="140" fill="url(#liqGrad)"/></svg></span><span class="lq-layer" style="width:756px;height:207px;top:50%;left:50%;transform:translate(-62%,-24%) rotate(160.227deg);mix-blend-mode:difference;"><svg class="lq-svg" viewBox="0 0 1030 280" preserveAspectRatio="none"><rect width="1030" height="280" rx="140" fill="url(#liqGrad)"/></svg></span><span class="lq-layer" style="width:756px;height:207px;top:50%;left:50%;transform:translate(-67%,-29%) rotate(180deg);mix-blend-mode:hard-light;"><svg class="lq-svg" viewBox="0 0 1030 280" preserveAspectRatio="none"><rect width="1030" height="280" rx="140" fill="url(#liqGrad)"/></svg></span><span class="lq-hi"></span></span><span class="lq-label"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.32 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.02 10.02 0 0 0 22 12.25C22 6.58 17.52 2 12 2Z"/></svg><span>View on GitHub</span></span></a>
     </div>
   </div>
 </div>
@@ -922,6 +1028,8 @@
     logo.style.background = p.logoBg; logo.style.color = p.logoColor; logo.style.borderColor = p.logoBorder;
     logo.innerHTML = p.logo;
     const ov = document.getElementById('proj-overlay');
+    const ovPanel = ov.querySelector('.proj-panel');
+    if (ovPanel) ovPanel.scrollTop = 0;
     ov.classList.add('open'); ov.setAttribute('aria-hidden','false');
     document.body.classList.add('modal-open');
     if (window.__lenis) window.__lenis.stop();
@@ -1143,7 +1251,7 @@
     document.body.appendChild(cursor);
     document.body.classList.add('cursor-none');
 
-    const SPRING = { mass: 0.1, stiffness: 131, damping: 10 };
+    const SPRING = { mass: 0.12, stiffness: 160, damping: 8.9 };
     const px = { v: -100, vel: 0 }, py = { v: -100, vel: 0 }, ps = { v: 0, vel: 0 };
     let tx = -100, ty = -100, tScale = 0, started = false, last = 0;
 
@@ -1156,7 +1264,7 @@
        web-font swap, image loads). Only the ONE element being entered is measured, and
        only when the target changes, so there's no per-frame layout cost. */
     function step(s, target, dt){
-      const sub = 4, h = dt / sub;
+      const sub = 8, h = dt / sub;
       for (let i = 0; i < sub; i++){
         const a = (-SPRING.stiffness * (s.v - target) - SPRING.damping * s.vel) / SPRING.mass;
         s.vel += a * h; s.v += s.vel * h;
@@ -1191,14 +1299,18 @@
       cursor.style.borderRadius = '50%';
     }
 
-    window.addEventListener('pointermove', function(e){
-      tx = e.clientX; ty = e.clientY;
+    function setTarget(e){
+      const ce = e.getCoalescedEvents ? e.getCoalescedEvents() : null;
+      const p = (ce && ce.length) ? ce[ce.length - 1] : e;
+      tx = p.clientX; ty = p.clientY;
       if(!started){ started = true; px.v = tx; py.v = ty; }
       tScale = 1;
       const el = candidate(e.target);
       if (el && el !== snapEl) enterSnap(el);
       else if (!el && snapEl) leaveSnap();
-    }, { passive: true });
+    }
+    window.addEventListener('pointermove', setTarget, { passive: true });
+    if ('onpointerrawupdate' in window) window.addEventListener('pointerrawupdate', setTarget, { passive: true });
 
     /* keep the ring locked to its element if the page scrolls while hovering */
     let sRaf = 0;
@@ -1225,5 +1337,19 @@
     requestAnimationFrame(frame);
   })();
 </script>
+  <script>
+  (function(){
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var SEL = '.btn,.btn-send,.pill-nav button,.scroll-down,.email-link,.brand,.card,.card-links a,.socials a,.resume-btn,.proj-close,.card-expand,.theme-switch,.shiny-cta,.lq-btn';
+    document.addEventListener('pointerdown', function(e){
+      var el = e.target && e.target.closest && e.target.closest(SEL);
+      if (!el) return;
+      el.classList.remove('is-pressed'); void el.offsetWidth; el.classList.add('is-pressed');
+    }, true);
+    document.addEventListener('animationend', function(e){
+      if (e.animationName === 'press-pop' && e.target.classList) e.target.classList.remove('is-pressed');
+    }, true);
+  })();
+  </script>
 </body>
 </html>
