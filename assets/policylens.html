@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PolicyLens — Privacy, Simplified.</title>
+<meta name="description" content="PolicyLens turns Privacy Policies and Terms into a plain-English verdict with a privacy score and red flags — and warns you before you click ‘I Agree’.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600;1,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBFAF7; --paper-2:#F4F2EC; --card:#FFFFFF;
+    --ink:#0F1B2D; --ink-soft:#33415C; --soft:#6B7585; --line:#E7E3DA; --line-2:#EDEAE2;
+    --accent:#2563EB; --accent-2:#3B82F6; --accent-ink:#1E40AF;
+    --safe:#16A34A; --warning:#E0962B; --danger:#DC2626;
+    --shadow-sm:0 1px 2px rgba(15,27,45,.05), 0 1px 1px rgba(15,27,45,.04);
+    --shadow:0 18px 40px -18px rgba(15,27,45,.22), 0 6px 14px -8px rgba(15,27,45,.12);
+    --shadow-lg:0 40px 80px -30px rgba(15,27,45,.34);
+    --r:18px;
+    --serif:"Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --sans:"Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--sans); color:var(--ink); background:var(--paper);
+    -webkit-font-smoothing:antialiased; line-height:1.6; overflow-x:hidden;
+  }
+  /* subtle paper grain + warm light wash */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(60% 50% at 78% -5%, rgba(59,130,246,.10), transparent 60%),
+      radial-gradient(50% 45% at 8% 8%, rgba(224,150,43,.07), transparent 55%);
+  }
+  body::after{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.4;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+    mix-blend-mode:multiply;
+  }
+  .wrap{max-width:1140px; margin:0 auto; padding:0 24px; position:relative; z-index:1}
+  a{color:inherit; text-decoration:none}
+  .serif{font-family:var(--serif); font-optical-sizing:auto}
+  svg{display:block}
+  .ic{stroke:currentColor; stroke-width:1.9; fill:none; stroke-linecap:round; stroke-linejoin:round}
+
+  /* ---------- buttons ---------- */
+  .btn{display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:15px;
+    padding:12px 20px; border-radius:12px; border:1px solid transparent; cursor:pointer;
+    transition:transform .15s ease, box-shadow .2s ease, background .2s ease; white-space:nowrap}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--accent); color:#fff; box-shadow:0 10px 22px -10px rgba(37,99,235,.6)}
+  .btn-primary:hover{background:var(--accent-ink); box-shadow:0 14px 30px -10px rgba(37,99,235,.7); transform:translateY(-2px)}
+  .btn:disabled, .btn.is-disabled{opacity:.5; cursor:not-allowed; pointer-events:none; box-shadow:none; transform:none}
+  .btn-ghost{background:var(--card); color:var(--ink); border-color:var(--line)}
+  .btn-ghost:hover{border-color:#cdd5e2; transform:translateY(-2px); box-shadow:var(--shadow-sm)}
+  .btn-block{width:100%; justify-content:center}
+
+  /* ---------- header ---------- */
+  header.nav{position:sticky; top:0; z-index:50; backdrop-filter:saturate(160%) blur(12px);
+    background:rgba(251,250,247,.78); border-bottom:1px solid transparent; transition:border-color .2s, box-shadow .2s}
+  header.nav.scrolled{border-color:var(--line); box-shadow:var(--shadow-sm)}
+  .nav-in{display:flex; align-items:center; justify-content:center; height:68px}
+  .brand{display:flex; align-items:center; gap:11px; font-weight:800; font-size:18px; letter-spacing:-.01em}
+  header.nav .brand{font-size:24px}
+  .logo{width:38px; height:38px; border-radius:11px; background:linear-gradient(150deg,#16243B,#0F1B2D);
+    display:flex; align-items:center; justify-content:center; color:#fff; box-shadow:inset 0 1px 0 rgba(255,255,255,.12), var(--shadow-sm)}
+  .nav-links{display:flex; align-items:center; gap:30px}
+  .nav-links a{font-size:14.5px; font-weight:600; color:var(--ink-soft); transition:color .15s}
+  .nav-links a:hover{color:var(--ink)}
+  .nav-cta{display:flex; align-items:center; gap:12px}
+  @media(max-width:860px){ .nav-links{display:none} .nav-cta .btn-ghost{display:none} }
+
+  /* ---------- hero ---------- */
+  .hero{padding:30px 0 26px; position:relative}
+  .hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:54px; align-items:center}
+  .eyebrow{display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.12em; color:var(--accent-ink);
+    background:rgba(37,99,235,.08); border:1px solid rgba(37,99,235,.18); padding:6px 12px; border-radius:999px}
+  .eyebrow .dot{width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 4px rgba(37,99,235,.18)}
+  .eyebrow.on-dark{color:#9DC2FF; background:rgba(59,130,246,.16); border-color:rgba(59,130,246,.34)}
+  h1.hero-title{font-family:var(--serif); font-weight:700; letter-spacing:-.02em; line-height:1.04;
+    font-size:clamp(40px,6vw,68px); margin:20px 0 0}
+  h1.hero-title em{font-style:italic; color:var(--accent)}
+  .hero-sub{font-size:18.5px; color:var(--ink-soft); margin:20px 0 0; max-width:30em}
+  .hero-actions{display:flex; gap:14px; margin:30px 0 0; flex-wrap:wrap}
+  .hero-note{display:flex; align-items:center; gap:18px; margin:22px 0 0; color:var(--soft); font-size:13.5px; flex-wrap:wrap}
+  .hero-note span{display:inline-flex; align-items:center; gap:7px}
+  .hero-note .ic{stroke:var(--safe)}
+  @media(max-width:880px){ .hero-grid{grid-template-columns:1fr; gap:36px} .hero{padding:48px 0 10px} }
+
+  /* ---------- product mock ---------- */
+  .mock-stage{position:relative}
+  .mock-glow{position:absolute; inset:-8% -6% -14% -6%; z-index:0; border-radius:40px;
+    background:radial-gradient(60% 60% at 70% 20%, rgba(59,130,246,.22), transparent 70%);}
+  .panel{position:relative; z-index:1; background:var(--card); border:1px solid var(--line);
+    border-radius:22px; box-shadow:var(--shadow-lg); padding:18px; max-width:380px; margin-left:auto}
+  .panel-head{display:flex; align-items:center; gap:10px; margin-bottom:14px}
+  .panel-head .logo{width:30px; height:30px; border-radius:9px}
+  .panel-head b{font-size:14px; font-weight:800}
+  .panel-head .company:empty{display:none}
+  .panel-head .tag{margin-left:auto; font-size:10.5px; font-weight:800; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--warning); background:rgba(224,150,43,.12); padding:4px 9px; border-radius:7px}
+  .verdict{border-radius:15px; padding:15px; color:#fff; background:linear-gradient(135deg,#E0962B,#C9791C)}
+  .verdict .lvl{font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; opacity:.95}
+  .verdict .ln{font-size:17px; font-weight:700; margin-top:5px; line-height:1.3}
+  .verdict .rec{display:inline-flex; align-items:center; gap:6px; margin-top:11px; font-size:12px; font-weight:700;
+    background:rgba(255,255,255,.22); padding:5px 11px; border-radius:8px}
+  .scoreline{display:flex; align-items:center; gap:13px; margin:13px 0; padding:13px;
+    border:1px solid var(--line); border-radius:14px; background:var(--paper)}
+  .ring{width:60px; height:60px; border-radius:50%; flex:0 0 auto; display:grid; place-items:center;
+    background:conic-gradient(var(--warning) calc(var(--p)*1%), #ECE7DC 0); position:relative}
+  .ring::before{content:""; position:absolute; inset:6px; border-radius:50%; background:var(--card)}
+  .ring i{position:relative; font-style:normal; font-weight:800; font-size:17px}
+  .ring i s{font-size:10px; color:var(--soft); text-decoration:none; font-weight:700}
+  .scoremeta b{display:flex; align-items:center; gap:6px; font-size:13.5px}
+  .scoremeta b .ic{stroke:var(--accent)}
+  .scoremeta p{font-size:11.5px; color:var(--soft); margin-top:3px}
+  .mh{font-size:10.5px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:var(--soft);
+    display:flex; align-items:center; gap:6px; margin:4px 0 9px}
+  .mh .ic{stroke:var(--soft)}
+  .risk{display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1px solid var(--line);
+    border-radius:12px; margin-bottom:7px; background:var(--card)}
+  .risk .pip{width:9px; height:9px; border-radius:50%; margin-top:5px; flex:0 0 auto}
+  .risk b{font-size:12.5px}
+  .risk p{font-size:11px; color:var(--soft); margin-top:1px; line-height:1.4}
+  /* centered, enlarged verdict statement (sits under the three risks) */
+  .verdict-big{text-align:center; padding:20px 14px 8px; border-top:1px solid var(--line); margin-top:13px}
+  .verdict-big .ring{width:78px; height:78px; margin:0 auto 14px}
+  .verdict-big .ring i{font-size:20px}
+  .verdict-big .ring i s{font-size:11px}
+  .lvl-big{font-size:12.5px; font-weight:800; letter-spacing:.15em; text-transform:uppercase; color:var(--warning)}
+  .ln-big{font-family:var(--serif); font-weight:700; font-size:23px; line-height:1.22; color:var(--ink);
+    margin:9px auto 0; max-width:16em}
+  .rec-c{display:inline-flex; align-items:center; gap:7px; margin-top:15px; font-size:12.5px; font-weight:800;
+    color:#fff; background:linear-gradient(135deg,#E0962B,#C9791C); padding:9px 16px; border-radius:999px}
+  .rec-c .ic{stroke:#fff}
+  .score-cap{font-size:11.5px; color:var(--soft); margin-top:12px}
+  /* hero: three real result cards (safe/moderate/high) + centered statement */
+  .hero-center{text-align:center}
+  .tabs-row{display:flex; justify-content:center; align-items:flex-end; gap:0; max-width:1080px; margin:0 auto 0; text-align:left;
+    -webkit-mask-image:linear-gradient(to bottom,#000 50%, transparent 99%); mask-image:linear-gradient(to bottom,#000 50%, transparent 99%)}
+  .tab{max-width:300px; flex:0 1 300px; margin:0; padding:13px; transition:transform .55s cubic-bezier(.2,.7,.2,1)}
+  .tab.safe{transform:rotate(-8deg); transform-origin:bottom right; margin-right:-18px; z-index:1}
+  .tab.high{transform:rotate(8deg); transform-origin:bottom left; margin-left:-18px; z-index:1}
+  .tab.warn{z-index:3; transform:translateY(-12px); box-shadow:0 30px 56px -24px rgba(15,27,45,.5)}
+  .tabs-row:hover .tab.safe{transform:rotate(-11deg) translateX(-6px)}
+  .tabs-row:hover .tab.high{transform:rotate(11deg) translateX(6px)}
+  .tab .panel-head{margin-bottom:9px}
+  .tab .panel-head b{font-size:13px}
+  .tab .panel-head .logo{width:26px; height:26px}
+  .tab .panel-head .tag{font-size:9.5px; padding:3px 7px}
+  .tab .verdict{padding:11px}
+  .tab .verdict .ln{font-size:13.5px}
+  .tab .verdict .rec{margin-top:9px; font-size:11px; padding:4px 9px}
+  .tab .scoreline{margin:9px 0; padding:9px; gap:10px}
+  .tab .ring{width:46px; height:46px}
+  .tab .ring i{font-size:13px}
+  .tab .ring i s{font-size:9px}
+  .tab .scoremeta b{font-size:12px}
+  .tab .scoremeta p{font-size:10.5px}
+  .tab .risk{padding:7px 10px}
+  .tab .risk b{font-size:11.5px}
+  .tab .risk p{font-size:10px}
+  .tab.safe .verdict{background:linear-gradient(135deg,#1FAE5A,#13803B)}
+  .tab.high .verdict{background:linear-gradient(135deg,#E0443C,#BE1B1B)}
+  .tab.safe .ring{background:conic-gradient(var(--safe) calc(var(--p)*1%), #ECE7DC 0)}
+  .tab.high .ring{background:conic-gradient(var(--danger) calc(var(--p)*1%), #ECE7DC 0)}
+  .tab.safe .panel-head .tag{color:var(--safe); background:rgba(22,163,74,.12)}
+  .tab.high .panel-head .tag{color:var(--danger); background:rgba(220,38,38,.12)}
+  .tab.safe .scoremeta b .ic{stroke:var(--safe)}
+  .tab.high .scoremeta b .ic{stroke:var(--danger)}
+  .hero-sub.center{margin-left:auto; margin-right:auto}
+  .hero-actions.center{justify-content:center}
+  .hero-note.center{justify-content:center}
+  /* the statement comes in BIG, rising out from under the fading cards */
+  .hero-center .hero-title{font-size:clamp(46px,12vw,120px); line-height:.98; margin:2px 0 0; position:relative;
+    animation:comeIn 1s .5s both cubic-bezier(.2,.72,.2,1)}
+  .hero-badge{display:inline-flex; margin:2px 0 14px}
+  @keyframes comeIn{from{opacity:0; transform:translateY(40px) scale(.93)} to{opacity:1; transform:none}}
+  /* typewriter: hidden sizer reserves the full footprint so nothing jumps; live text overlays it */
+  .hero-title .tw-size{visibility:hidden}
+  .hero-title .tw-live{position:absolute; inset:0}
+  .tw-cur{display:inline-block; color:var(--accent); font-style:normal; font-weight:400; margin-left:.04em;
+    animation:twBlink 1s steps(1) infinite}
+  @keyframes twBlink{50%{opacity:0}}
+  @media(prefers-reduced-motion:reduce){ .tw-cur{animation:none} }
+  @media(prefers-reduced-motion:reduce){ .hero-center .hero-title{animation:none} }
+  .deck{position:relative; width:100%}
+  @media(max-width:880px){
+    .hero-center .hero-title{font-size:clamp(40px,12.5vw,80px); margin-top:8px}
+  }
+
+  /* ---------- section frame ---------- */
+  section{position:relative; z-index:1}
+  .sec{padding:84px 0}
+  .sec-head{max-width:660px; margin:0 auto 52px; text-align:center}
+  .kicker{font-size:12.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--accent)}
+  .sec-head h2{font-family:var(--serif); font-weight:700; letter-spacing:-.02em; font-size:clamp(30px,4.4vw,44px); margin:14px 0 0; line-height:1.1}
+  .sec-head p{color:var(--ink-soft); font-size:17px; margin:16px 0 0}
+
+  /* ---------- how it works ---------- */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:22px}
+  .step{background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:26px; box-shadow:var(--shadow-sm)}
+  .step .n{font-family:var(--serif); font-size:14px; font-weight:600; color:var(--accent)}
+  .step .icon{width:46px; height:46px; border-radius:13px; background:rgba(37,99,235,.09); color:var(--accent);
+    display:flex; align-items:center; justify-content:center; margin:14px 0}
+  .step h3{font-size:18px; font-weight:700; letter-spacing:-.01em}
+  .step p{color:var(--soft); font-size:14.5px; margin-top:8px}
+  @media(max-width:820px){ .steps{grid-template-columns:1fr} }
+
+  /* ---------- features ---------- */
+  .feat-band{background:linear-gradient(180deg,#0F1B2D,#13243C); color:#EAF0F8; border-radius:34px; padding:64px 44px; position:relative; overflow:hidden}
+  .feat-band::before{content:""; position:absolute; inset:0; opacity:.5;
+    background:radial-gradient(40% 50% at 85% 10%, rgba(59,130,246,.4), transparent 60%), radial-gradient(35% 40% at 5% 90%, rgba(224,150,43,.18), transparent 60%)}
+  .feat-band .sec-head h2{color:#fff}
+  .feat-band .sec-head p{color:#AEBBCE}
+  .feat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; position:relative}
+  .feat{background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:24px; backdrop-filter:blur(4px); transition:transform .18s, background .18s}
+  .feat:hover{transform:translateY(-4px); background:rgba(255,255,255,.08)}
+  .feat .icon{width:42px; height:42px; border-radius:11px; display:flex; align-items:center; justify-content:center; margin-bottom:14px;
+    background:rgba(59,130,246,.18); color:#9DC2FF}
+  .feat.star .icon{background:rgba(224,150,43,.2); color:#F2C078}
+  .feat h3{font-size:16.5px; font-weight:700}
+  .feat p{color:#AEBBCE; font-size:14px; margin-top:7px}
+  /* real-example result card inside the dark "what it catches" band */
+  .feat-example{margin-top:44px; display:flex; justify-content:center; position:relative}
+  .ex-card{max-width:440px; width:100%; margin:0; text-align:left}
+  .ex-card .verdict .ln{font-size:16px}
+  .ex-high .verdict{background:linear-gradient(135deg,#E0443C,#BE1B1B)}
+  .ex-high .ring{background:conic-gradient(var(--danger) calc(var(--p)*1%), #ECE7DC 0)}
+  .ex-high .panel-head .tag{color:var(--danger); background:rgba(220,38,38,.12)}
+  .ex-high .scoremeta b .ic{stroke:var(--danger)}
+  /* ---- browser-window mockup: extension running on a Netflix login page ---- */
+  .browser-mock{width:100%; max-width:1000px; margin:0 auto; border-radius:16px; overflow:hidden;
+    background:#0b1220; border:1px solid rgba(255,255,255,.12); box-shadow:0 50px 110px -34px rgba(0,0,0,.65)}
+  .bm-bar{display:flex; align-items:center; gap:14px; padding:11px 16px; background:#0f1726; border-bottom:1px solid rgba(255,255,255,.08)}
+  .bm-dots{display:flex; gap:7px; flex:0 0 auto}
+  .bm-dots i{width:11px; height:11px; border-radius:50%}
+  .bm-dots i:nth-child(1){background:#ff5f57}
+  .bm-dots i:nth-child(2){background:#febc2e}
+  .bm-dots i:nth-child(3){background:#28c840}
+  .bm-url{flex:1; display:flex; align-items:center; gap:8px; max-width:520px; margin:0 auto;
+    background:#1b2436; color:#9fb0c8; font-size:13px; padding:7px 14px; border-radius:999px}
+  .bm-url .ic{stroke:#79e08a; flex:0 0 auto}
+  .bm-tools{flex:0 0 auto; display:flex; align-items:center; gap:10px}
+  .bm-ext{position:relative; width:30px; height:30px; border-radius:8px; display:grid; place-items:center;
+    background:rgba(59,130,246,.18); border:1px solid rgba(59,130,246,.45)}
+  .bm-ext .ic{stroke:#9DC2FF}
+  .bm-ext::after{content:""; position:absolute; top:3px; right:3px; width:8px; height:8px; border-radius:50%; background:#ff5f57; border:2px solid #0f1726}
+  .bm-view{position:relative; height:700px; overflow:hidden}
+  /* stylized Netflix login page */
+  .nflx{position:absolute; inset:0; color:#fff; overflow:hidden;
+    background:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.78)), radial-gradient(120% 80% at 50% -10%, #5a0b0b, #1a0606 55%, #000 100%)}
+  .nflx-top{display:flex; align-items:center; justify-content:space-between; padding:22px 36px}
+  .nflx-logo{color:#E50914; font-weight:900; letter-spacing:.14em; font-size:27px}
+  .nflx-lang{font-size:12.5px; color:#dcdcdc; border:1px solid rgba(255,255,255,.4); border-radius:5px; padding:4px 10px}
+  .nflx-form{width:min(360px,86%); margin:26px auto 0; background:rgba(0,0,0,.72); border-radius:8px; padding:40px 36px}
+  .nflx-form h3{font-size:28px; font-weight:800; margin-bottom:24px}
+  .nflx-field{background:#333; color:#9a9a9a; border-radius:5px; padding:16px; font-size:14px; margin-bottom:14px; text-align:left}
+  .nflx-btn{width:100%; background:#E50914; color:#fff; border:0; border-radius:5px; padding:14px; font-size:15px; font-weight:700; margin-top:8px; cursor:default}
+  .nflx-row{display:flex; justify-content:space-between; align-items:center; color:#b3b3b3; font-size:12.5px; margin-top:16px}
+  .nflx-row .chk{display:inline-block; width:12px; height:12px; background:#737373; border-radius:2px; vertical-align:-2px; margin-right:6px}
+  .nflx-foot{color:#b3b3b3; font-size:14px; margin-top:28px; text-align:left}
+  .nflx-foot b{color:#fff; font-weight:600}
+  /* extension popup floating over the page */
+  .pl-popup{position:absolute; top:16px; right:18px; width:344px; z-index:5;
+    animation:plDrop .55s cubic-bezier(.2,.7,.2,1) both}
+  .pl-popup .ex-card{max-width:none; width:100%; margin:0; box-shadow:0 28px 64px -18px rgba(0,0,0,.6)}
+  .pl-popup::before{content:""; position:absolute; top:-8px; right:34px; width:15px; height:15px; background:var(--card);
+    border-left:1px solid var(--line); border-top:1px solid var(--line); transform:rotate(45deg)}
+  @keyframes plDrop{from{opacity:0; transform:translateY(-14px)} to{opacity:1; transform:none}}
+  @media(prefers-reduced-motion:reduce){ .pl-popup{animation:none} }
+  @media(max-width:860px){
+    .bm-view{height:auto}
+    .nflx{position:relative}
+    .nflx-form{margin-bottom:26px}
+    .pl-popup{position:static; width:auto; margin:14px; animation:none}
+    .pl-popup::before{display:none}
+  }
+  @media(max-width:820px){ .feat-grid{grid-template-columns:1fr} .feat-band{padding:44px 22px; border-radius:24px} }
+
+  /* ---------- pricing ---------- */
+  .toggle{display:flex; align-items:center; justify-content:center; gap:14px; margin:0 0 38px}
+  .seg{position:relative; display:inline-flex; padding:5px; border-radius:999px;
+    background:var(--paper); border:1px solid var(--line); box-shadow:inset 0 1px 2px rgba(15,27,45,.06)}
+  .seg-btn{position:relative; z-index:2; box-sizing:border-box; min-width:120px; text-align:center;
+    border:none; background:transparent; cursor:pointer; font-family:inherit; font-size:14.5px; font-weight:800;
+    color:var(--soft); padding:9px 0; border-radius:999px; transition:color .25s}
+  .seg-btn.on{color:#fff}
+  .seg-thumb{position:absolute; z-index:1; top:5px; bottom:5px; left:5px; width:calc((100% - 10px)/2); border-radius:999px;
+    background:linear-gradient(180deg,#3B82F6,#2563EB);
+    box-shadow:0 8px 18px -7px rgba(37,99,235,.75), inset 0 1px 0 rgba(255,255,255,.45);
+    transition:transform .3s cubic-bezier(.4,1.25,.5,1)}
+  .seg.annual .seg-thumb{transform:translateX(100%)}
+  .save{font-size:12px; font-weight:800; color:var(--safe); background:rgba(22,163,74,.1); border:1px solid rgba(22,163,74,.25); padding:4px 9px; border-radius:999px}
+  .tiers{display:grid; grid-template-columns:repeat(4,1fr); gap:18px; align-items:stretch}
+  .tier{background:var(--card); border:1px solid var(--line); border-radius:20px; padding:26px 22px; display:flex; flex-direction:column; box-shadow:var(--shadow-sm); transition:transform .18s, box-shadow .2s}
+  .tier:hover{transform:translateY(-5px); box-shadow:var(--shadow)}
+  .tier.popular{border-color:transparent; box-shadow:var(--shadow-lg); position:relative; background:linear-gradient(180deg,#fff,#fbfcff)}
+  .tier.popular::before{content:""; position:absolute; inset:0; border-radius:20px; padding:1.4px; background:linear-gradient(160deg,var(--accent),#7DA8FF); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none}
+  .badge-pop{position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--accent); color:#fff; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; padding:5px 13px; border-radius:999px; box-shadow:0 8px 18px -8px rgba(37,99,235,.7)}
+  .tier .pname{font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-ink)}
+  .tier .price{display:flex; align-items:flex-end; gap:3px; margin:12px 0 2px}
+  .tier .price .cur{font-size:20px; font-weight:700; color:var(--ink); margin-bottom:6px}
+  .tier .price .amt{font-family:var(--serif); font-weight:700; font-size:46px; line-height:1; letter-spacing:-.02em}
+  .tier .price .per{font-size:13.5px; color:var(--soft); font-weight:600; margin-bottom:7px}
+  .tier .billed{font-size:12px; color:var(--soft); min-height:16px}
+  .tier .quota{margin:16px 0; padding:12px 14px; border-radius:12px; background:var(--paper); border:1px solid var(--line); display:flex; align-items:center; gap:10px}
+  .tier .quota .q-ic{width:34px;height:34px;border-radius:10px;background:rgba(37,99,235,.1);color:var(--accent);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .tier .quota .q-num{font-weight:800; font-size:16px; line-height:1.1}
+  .tier .quota .q-lbl{font-size:11.5px; color:var(--soft)}
+  .tier ul{list-style:none; margin:4px 0 22px; display:flex; flex-direction:column; gap:11px; flex:1}
+  .tier li{display:flex; align-items:flex-start; gap:9px; font-size:13.5px; color:var(--ink-soft)}
+  .tier li .ic{stroke:var(--safe); flex:0 0 auto; margin-top:2px}
+  .tier li.muted{color:var(--soft)} .tier li.muted .ic{stroke:var(--soft)}
+  @media(max-width:980px){ .tiers{grid-template-columns:repeat(2,1fr)} }
+  @media(max-width:560px){ .tiers{grid-template-columns:1fr} }
+
+  /* ---------- faq ---------- */
+  .faq{max-width:760px; margin:0 auto}
+  .qa{border:1px solid var(--line); border-radius:14px; background:var(--card); margin-bottom:12px; overflow:hidden}
+  .qa summary{list-style:none; cursor:pointer; padding:18px 20px; font-weight:700; font-size:16px; display:flex; align-items:center; gap:12px}
+  .qa summary::-webkit-details-marker{display:none}
+  .qa summary .ic{stroke:var(--accent); margin-left:auto; transition:transform .2s}
+  .qa[open] summary .ic{transform:rotate(45deg)}
+  .qa .a{padding:0 20px 18px; color:var(--ink-soft); font-size:14.5px}
+
+  /* ---------- cta band (enlarged + shader background) ---------- */
+  .cta-wrap{max-width:none; padding-left:0; padding-right:0}
+  .cta{position:relative; isolation:isolate; overflow:hidden; color:#fff; text-align:center;
+    width:min(86vw,1600px); margin:0 auto; min-height:82vh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:clamp(48px,7vw,110px) clamp(24px,6vw,90px);
+    border-radius:34px; background:linear-gradient(135deg,#16243B,#0F1B2D)}
+  .cta::before{content:""; position:absolute; inset:0; z-index:0; opacity:.5;
+    background:radial-gradient(45% 60% at 80% 0%, rgba(59,130,246,.45), transparent 60%)}
+  /* three.js line-shader background — screen blend lets the navy show through the black */
+  .cta-shader{position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none;
+    mix-blend-mode:screen; opacity:.85}
+  .cta-shader canvas{display:block; width:100%; height:100%}
+  .cta > :not(.cta-shader){position:relative; z-index:1}
+  .cta .eyebrow{font-size:clamp(18px,2.2vw,26px); padding:14px 34px; letter-spacing:.22em; gap:12px; margin-bottom:34px}
+  .cta h2{font-family:var(--serif); font-weight:700; font-size:clamp(38px,6vw,74px); letter-spacing:-.02em; line-height:1.05; position:relative}
+  .cta p{color:#C3D0E2; margin:20px auto 8px; max-width:34em; font-size:clamp(15px,1.4vw,18px); position:relative}
+  .cta p.cta-note{margin:14px auto 0; font-size:15px; font-weight:600; color:#9FB3CE}
+  /* extension-style result popup (Netflix example) */
+  .ext-head{display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding-bottom:12px; margin-bottom:14px; border-bottom:1px solid var(--line)}
+  .ext-brand{display:flex; align-items:center; gap:9px; font-size:15px; font-weight:800; color:var(--ink)}
+  .ext-logo{width:30px; height:30px; border-radius:9px; background:#0F1B2D; display:grid; place-items:center}
+  .ext-logo .ic{stroke:#fff}
+  .ext-x{color:var(--soft); display:grid; place-items:center}
+  .cta .btn-primary{position:relative}
+
+  /* ---------- footer ---------- */
+  footer{padding:54px 0 40px; border-top:1px solid var(--line); margin-top:84px}
+  .foot-in{display:flex; justify-content:space-between; gap:30px; flex-wrap:wrap; align-items:flex-start}
+  .foot-brand{max-width:320px}
+  .foot-brand p{color:var(--soft); font-size:13.5px; margin-top:12px}
+  .foot-cols{display:flex; gap:56px; flex-wrap:wrap}
+  .foot-col h4{font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--soft); margin-bottom:12px}
+  .foot-col a{display:block; font-size:14px; color:var(--ink-soft); margin-bottom:9px}
+  .foot-col a:hover{color:var(--accent)}
+  .foot-legal{margin-top:34px; padding-top:22px; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; color:var(--soft); font-size:12.5px}
+
+  /* ---------- reveal ---------- */
+  .reveal{opacity:0; transform:translateY(22px); transition:opacity .7s ease, transform .7s ease}
+  .reveal.in{opacity:1; transform:none}
+  @media(prefers-reduced-motion:reduce){ .reveal{opacity:1; transform:none; transition:none} * {scroll-behavior:auto} }
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="nav" id="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="#top">PolicyLens</a>
+  </div>
+</header>
+
+<span id="top"></span>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="wrap hero-center">
+    <div class="deck">
+    <!-- three real result cards: safe / moderate / high -->
+    <div class="tabs-row reveal">
+
+      <!--
+        RESULT CARD SCHEMA — drop in real company examples (Netflix, Instagram, Discord, …)
+        .company = company name   ·   .lvl + .ln = verdict   ·   .rec = recommendation
+        .ring b  = privacy score  ·   .risk = one top risk (repeat as needed)
+      -->
+
+      <!-- SAFE (green) -->
+      <div class="panel tab safe">
+        <div class="panel-head">
+          <b class="company"></b>
+          <span class="tag">Analyzed</span>
+        </div>
+        <div class="verdict">
+          <div class="lvl">Very Safe</div>
+          <div class="ln">Minimal data collected, with strong user controls.</div>
+          <div class="rec"><svg width="15" height="15" viewBox="0 0 24 24" class="ic" style="stroke:#fff"><path d="M20 6 9 17l-5-5"/></svg> Safe to proceed</div>
+        </div>
+        <div class="scoreline">
+          <div class="ring" style="--p:88"><i><b>88</b><s>/100</s></i></div>
+          <div class="scoremeta">
+            <b><svg width="15" height="15" viewBox="0 0 24 24" class="ic"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg> Privacy Score</b>
+            <p>Higher is safer.</p>
+          </div>
+        </div>
+        <div class="mh"><svg width="14" height="14" viewBox="0 0 24 24" class="ic"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg> Top risks</div>
+        <div class="risk"><span class="pip" style="background:var(--safe)"></span><div><b>Delete anytime</b><p>Erase your account and data on request.</p></div></div>
+        <div class="risk"><span class="pip" style="background:var(--warning)"></span><div><b>Basic analytics</b><p>Standard, privacy-respecting analytics only.</p></div></div>
+      </div>
+
+      <!-- MODERATE (amber) -->
+      <div class="panel tab warn">
+        <div class="panel-head">
+          <b class="company"></b>
+          <span class="tag">Analyzed</span>
+        </div>
+        <div class="verdict">
+          <div class="lvl">Moderate Risk</div>
+          <div class="ln">Usable, but it collects and shares more than most.</div>
+          <div class="rec"><svg width="15" height="15" viewBox="0 0 24 24" class="ic" style="stroke:#fff"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg> Proceed with awareness</div>
+        </div>
+        <div class="scoreline">
+          <div class="ring" style="--p:42"><i><b>42</b><s>/100</s></i></div>
+          <div class="scoremeta">
+            <b><svg width="15" height="15" viewBox="0 0 24 24" class="ic"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg> Privacy Score</b>
+            <p>Higher is safer.</p>
+          </div>
+        </div>
+        <div class="mh"><svg width="14" height="14" viewBox="0 0 24 24" class="ic"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg> Top risks</div>
+        <div class="risk"><span class="pip" style="background:var(--danger)"></span><div><b>Data shared with third parties</b><p>Your info may be sold to advertising partners.</p></div></div>
+        <div class="risk"><span class="pip" style="background:var(--warning)"></span><div><b>Auto-renewing subscription</b><p>Renews automatically unless you cancel first.</p></div></div>
+      </div>
+
+      <!-- HIGH (red) -->
+      <div class="panel tab high">
+        <div class="panel-head">
+          <b class="company"></b>
+          <span class="tag">Analyzed</span>
+        </div>
+        <div class="verdict">
+          <div class="lvl">High Risk</div>
+          <div class="ln">Broad data sharing and pervasive tracking.</div>
+          <div class="rec"><svg width="15" height="15" viewBox="0 0 24 24" class="ic" style="stroke:#fff"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg> High caution</div>
+        </div>
+        <div class="scoreline">
+          <div class="ring" style="--p:17"><i><b>17</b><s>/100</s></i></div>
+          <div class="scoremeta">
+            <b><svg width="15" height="15" viewBox="0 0 24 24" class="ic"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg> Privacy Score</b>
+            <p>Higher is safer.</p>
+          </div>
+        </div>
+        <div class="mh"><svg width="14" height="14" viewBox="0 0 24 24" class="ic"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg> Top risks</div>
+        <div class="risk"><span class="pip" style="background:var(--danger)"></span><div><b>Sells data to brokers</b><p>Your data is sold to third-party data brokers.</p></div></div>
+        <div class="risk"><span class="pip" style="background:var(--danger)"></span><div><b>Tracks across the web</b><p>Builds a profile from your browsing activity.</p></div></div>
+      </div>
+
+    </div>
+    </div>
+
+    <span class="eyebrow hero-badge">Browser Extension</span>
+    <h1 class="hero-title serif" aria-label="Privacy, Simplified.">
+      <span class="tw-size" aria-hidden="true">Privacy,<br>Simplified.</span>
+      <span class="tw-live" aria-hidden="true"><span id="twA"></span><br><em id="twB"></em><span id="twC"></span></span>
+    </h1>
+    <p class="hero-sub center">PolicyLens uses AI to instantly analyze Privacy Policies and Terms of Service, uncover hidden risks, and explain what you’re really agreeing to — <strong>before</strong> you click “I Agree.”</p>
+    <div class="hero-actions center">
+      <button class="btn btn-primary is-disabled" type="button" disabled aria-disabled="true">Coming Soon</button>
+      <a class="btn btn-ghost" href="#how">See how it works</a>
+    </div>
+    <div class="hero-note center">
+      <span><svg width="16" height="16" viewBox="0 0 24 24" class="ic"><path d="M20 6 9 17l-5-5"/></svg> Understand policies in seconds</span>
+      <span><svg width="16" height="16" viewBox="0 0 24 24" class="ic"><path d="M20 6 9 17l-5-5"/></svg> Get warned before you agree</span>
+      <span><svg width="16" height="16" viewBox="0 0 24 24" class="ic"><path d="M20 6 9 17l-5-5"/></svg> Cancel anytime</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="sec" id="how">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="kicker">How it works</span>
+      <h2 class="serif">Three seconds, not thirty pages.</h2>
+      <p>PolicyLens reads the legalese for you and hands back something a human can actually understand.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <span class="n serif">01</span>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" class="ic"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
+        <h3>Open any sign-up or login page</h3>
+        <p>PolicyLens detects when a website asks you to accept Privacy Policies, Terms of Service, or cookie agreements.</p>
+      </div>
+      <div class="step reveal" style="transition-delay:.1s">
+        <span class="n serif">02</span>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" class="ic"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg></div>
+        <h3>Click Analyze</h3>
+        <p>One click is all it takes. PolicyLens reads the linked legal documents and evaluates them using AI.</p>
+      </div>
+      <div class="step reveal" style="transition-delay:.2s">
+        <span class="n serif">03</span>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" class="ic"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <h3>Get a Privacy Verdict</h3>
+        <p>Receive a privacy score, key risks, data-sharing insights, and a clear recommendation before you agree.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="sec" id="features" style="padding-top:20px">
+  <div class="wrap">
+    <div class="feat-band reveal">
+      <div class="sec-head" style="margin-bottom:42px">
+        <span class="kicker" style="color:#9DC2FF">What it catches</span>
+        <h2 class="serif">Know the risks before you agree.</h2>
+        <p>PolicyLens highlights the clauses that matter most, so you can make informed decisions in seconds.</p>
+      </div>
+      <div class="feat-grid">
+        <div class="feat star">
+          <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" class="ic"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg></div>
+          <h3>Data Selling</h3>
+          <p>Find out if a company can sell or share your personal information with advertisers, partners, or data brokers.</p>
+        </div>
+        <div class="feat">
+          <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" class="ic"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <h3>Tracking</h3>
+          <p>See whether a website tracks your activity across websites, devices, or services.</p>
+        </div>
+        <div class="feat">
+          <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" class="ic"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+          <h3>Auto-Renewals</h3>
+          <p>Spot subscriptions that automatically renew and may continue charging you.</p>
+        </div>
+        <div class="feat">
+          <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" class="ic"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <h3>AI Training</h3>
+          <p>Know if your content, uploads, or activity may be used to train AI systems.</p>
+        </div>
+        <div class="feat">
+          <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" class="ic"><circle cx="9" cy="8" r="3.2"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><path d="M16 5.2A3.2 3.2 0 0 1 16 11M21 20v-1a5 5 0 0 0-3.5-4.8"/></svg></div>
+          <h3>Forced Arbitration</h3>
+          <p>Identify clauses that limit your ability to take legal action.</p>
+        </div>
+        <div class="feat">
+          <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" class="ic"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg></div>
+          <h3>Broad Content Licenses</h3>
+          <p>See when a platform receives extensive rights over content you upload.</p>
+        </div>
+      </div>
+
+      <!-- real example: the extension running on a Netflix login page -->
+      <div class="feat-example reveal">
+        <div class="browser-mock">
+          <div class="bm-bar">
+            <span class="bm-dots"><i></i><i></i><i></i></span>
+            <span class="bm-url"><svg width="14" height="14" viewBox="0 0 24 24" class="ic"><path d="M7 11V7a5 5 0 0 1 10 0v4"/><rect x="5" y="11" width="14" height="9" rx="2"/></svg>netflix.com/login</span>
+            <span class="bm-tools">
+              <span class="bm-ext" title="PolicyLens"><svg width="18" height="18" viewBox="0 0 24 24" class="ic"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><circle cx="11.5" cy="13" r="2.6"/><path d="m14 15.5 2 2"/></svg></span>
+            </span>
+          </div>
+          <div class="bm-view">
+            <!-- stylized Netflix login page (mockup, no copyrighted assets) -->
+            <div class="nflx">
+              <div class="nflx-top">
+                <span class="nflx-logo">NETFLIX</span>
+                <span class="nflx-lang">English ▾</span>
+              </div>
+              <div class="nflx-form">
+                <h3>Sign In</h3>
+                <div class="nflx-field">Email or phone number</div>
+                <div class="nflx-field">Password</div>
+                <button class="nflx-btn" type="button" disabled>Sign In</button>
+                <div class="nflx-row"><span><i class="chk"></i> Remember me</span><span>Need help?</span></div>
+                <p class="nflx-foot">New to Netflix? <b>Sign up now.</b></p>
+              </div>
+            </div>
+            <!-- PolicyLens extension popup (the result), anchored under the toolbar icon -->
+            <div class="pl-popup">
+              <div class="panel ex-card ex-high">
+                <div class="ext-head">
+                  <span class="ext-brand">
+                    <span class="ext-logo"><svg width="18" height="18" viewBox="0 0 24 24" class="ic"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><circle cx="11.5" cy="13" r="2.6"/><path d="m14 15.5 2 2"/></svg></span>
+                    <b>PolicyLens</b>
+                  </span>
+                  <span class="ext-x" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" class="ic"><path d="M18 6 6 18M6 6l12 12"/></svg></span>
+                </div>
+                <div class="verdict">
+                  <div class="lvl">High Risk</div>
+                  <div class="ln">You can cancel, but the service collects extensive viewing, device, and advertising data. It also shares data across Netflix companies, service providers, partners, and advertisers.</div>
+                  <div class="rec"><svg width="15" height="15" viewBox="0 0 24 24" class="ic" style="stroke:#fff"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg> Review Carefully</div>
+                </div>
+                <div class="scoreline">
+                  <div class="ring" style="--p:25"><i><b>25</b><s>/100</s></i></div>
+                  <div class="scoremeta">
+                    <b><svg width="15" height="15" viewBox="0 0 24 24" class="ic"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg> Privacy Score</b>
+                    <p>Higher is safer — built from data collection, tracking, sharing &amp; your control.</p>
+                  </div>
+                </div>
+                <div class="mh"><svg width="14" height="14" viewBox="0 0 24 24" class="ic"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg> Top risks</div>
+                <div class="risk"><span class="pip" style="background:var(--danger)"></span><div><b>Automatic renewal</b><p>Your subscription keeps going until you cancel, and Netflix can charge the next billing cycle automatically.</p></div></div>
+                <div class="risk"><span class="pip" style="background:var(--danger)"></span><div><b>Extensive tracking</b><p>Netflix tracks viewing, searches, clicks, device identifiers, and ad interactions, and uses cookies and pixel tags.</p></div></div>
+                <div class="risk"><span class="pip" style="background:var(--danger)"></span><div><b>Third-party sharing</b><p>Your data may be shared with partners, advertisers, service providers, and Netflix affiliates for many business purposes.</p></div></div>
+                <div class="risk"><span class="pip" style="background:var(--warning)"></span><div><b>Refund limits</b><p>If you cancel partway through a billing period, you usually do not get money back for unused time.</p></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="sec" id="faq" style="padding-top:20px">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="kicker">FAQ</span>
+      <h2 class="serif">Good questions.</h2>
+    </div>
+    <div class="faq">
+      <details class="qa reveal" open>
+        <summary>Is this legal advice? <svg width="20" height="20" viewBox="0 0 24 24" class="ic"><path d="M12 5v14M5 12h14"/></svg></summary>
+        <div class="a">No. PolicyLens gives informational summaries to help you understand what you’re agreeing to. It isn’t a lawyer and isn’t a substitute for one.</div>
+      </details>
+      <details class="qa reveal">
+        <summary>Which browsers does it support? <svg width="20" height="20" viewBox="0 0 24 24" class="ic"><path d="M12 5v14M5 12h14"/></svg></summary>
+        <div class="a">Any Chromium browser — Google Chrome, Microsoft Edge, Brave and similar. It installs as a standard browser extension.</div>
+      </details>
+      <details class="qa reveal">
+        <summary>Is my browsing private? <svg width="20" height="20" viewBox="0 0 24 24" class="ic"><path d="M12 5v14M5 12h14"/></svg></summary>
+        <div class="a">PolicyLens only reads a page when you ask it to analyze one. It looks at the policy and terms text on that page — not your general browsing — and your saved reports stay in your browser.</div>
+      </details>
+      <details class="qa reveal">
+        <summary>How is the Privacy Score calculated? <svg width="20" height="20" viewBox="0 0 24 24" class="ic"><path d="M12 5v14M5 12h14"/></svg></summary>
+        <div class="a">The score is based on factors including data collection, tracking practices, third-party sharing, user controls, retention policies, and other privacy-related risks. Higher scores indicate stronger privacy protections.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="sec" style="padding-top:0">
+  <div class="wrap cta-wrap">
+    <div class="cta reveal">
+      <div class="cta-shader" aria-hidden="true"></div>
+      <span class="eyebrow on-dark">Launching Soon</span>
+      <h2 class="serif">Know what you’re agreeing to.</h2>
+      <p>Add PolicyLens and get a plain-English read on the next “I Agree” you’re about to click.</p>
+      <p class="cta-note">Be among the first to use PolicyLens when it launches.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-in">
+      <div class="foot-brand">
+        <a class="brand" href="#top">PolicyLens</a>
+        <p>Privacy, Simplified. Plain-English summaries of Privacy Policies and Terms — not legal advice.</p>
+      </div>
+      <div class="foot-cols">
+        <div class="foot-col">
+          <h4>Product</h4>
+          <a href="#how">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#faq">FAQ</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-legal">
+      <span>© 2026 PolicyLens. All rights reserved.</span>
+      <span>PolicyLens provides informational summaries only and is not legal advice.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // sticky header shadow
+  var nav = document.getElementById('nav');
+  var onScroll = function(){ nav.classList.toggle('scrolled', window.scrollY > 8); };
+  onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
+
+
+  // reveal on scroll
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:.12, rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+
+  // scale the fanned card deck to fit its container, so the same fan shows on mobile
+  (function(){
+    var row = document.querySelector('.tabs-row');
+    var wrap = document.querySelector('.deck');
+    if (!row || !wrap) return;
+    function fitDeck(){
+      row.style.transform = 'none';
+      row.style.width = 'max-content';
+      var natW = row.offsetWidth || 1;
+      var natH = row.offsetHeight || 1;
+      row.style.width = '';                       // back to flow width
+      var avail = wrap.clientWidth || natW;
+      var scale = Math.min(1, avail / natW);
+      row.style.transformOrigin = 'top center';
+      row.style.transform = 'scale(' + scale + ')';
+      wrap.style.height = Math.ceil(natH * scale) + 'px';
+    }
+    window.addEventListener('resize', fitDeck, { passive: true });
+    window.addEventListener('load', fitDeck);
+    fitDeck();
+    setTimeout(fitDeck, 250);
+    setTimeout(fitDeck, 800);
+  })();
+
+  // typewriter for the hero headline ("Privacy, Simplified.")
+  (function(){
+    var a = document.getElementById('twA'), b = document.getElementById('twB'),
+        c = document.getElementById('twC'), cur = document.getElementById('twCur');
+    if (!a || !b || !c) return;
+    var segs = [{el:a, t:"Privacy,"}, {el:b, t:"Simplified"}, {el:c, t:"."}];
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { segs.forEach(function(s){ s.el.textContent = s.t; }); return; }
+    var si = 0, ci = 0, speed = 64;
+    function step(){
+      if (si >= segs.length) return;
+      var s = segs[si];
+      if (ci < s.t.length){
+        var ch = s.t.charAt(ci);
+        s.el.textContent += ch;
+        ci++;
+        setTimeout(step, ch === ',' ? speed + 180 : speed);   // small beat after the comma
+      } else {
+        si++; ci = 0;
+        setTimeout(step, si < segs.length ? speed : 0);
+      }
+    }
+    setTimeout(step, 450);   // start shortly after load
+  })();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+  /* ShaderAnimation (ported from the provided React/three component) — fills the CTA panel */
+  (function(){
+    var container = document.querySelector('.cta-shader');
+    if (!container || !window.THREE) return;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var vertexShader = 'void main(){ gl_Position = vec4( position, 1.0 ); }';
+    var fragmentShader = [
+      '#define TWO_PI 6.2831853072',
+      '#define PI 3.14159265359',
+      'precision highp float;',
+      'uniform vec2 resolution;',
+      'uniform float time;',
+      'void main(void){',
+      '  vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);',
+      '  float t = time*0.05;',
+      '  float lineWidth = 0.002;',
+      '  vec3 color = vec3(0.0);',
+      '  for(int j = 0; j < 3; j++){',
+      '    for(int i=0; i < 5; i++){',
+      '      color[j] += lineWidth*float(i*i) / abs(fract(t - 0.01*float(j)+float(i)*0.01)*5.0 - length(uv) + mod(uv.x+uv.y, 0.2));',
+      '    }',
+      '  }',
+      '  gl_FragColor = vec4(color[0],color[1],color[2],1.0);',
+      '}'
+    ].join('\n');
+
+    var camera = new THREE.Camera();
+    camera.position.z = 1;
+    var scene = new THREE.Scene();
+    var geometry = new THREE.PlaneGeometry(2, 2);
+    var uniforms = { time: { value: 1.0 }, resolution: { value: new THREE.Vector2() } };
+    var material = new THREE.ShaderMaterial({ uniforms: uniforms, vertexShader: vertexShader, fragmentShader: fragmentShader });
+    scene.add(new THREE.Mesh(geometry, material));
+
+    var renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    function resize(){
+      var w = container.clientWidth, h = container.clientHeight;
+      if (!w || !h) return;
+      renderer.setSize(w, h);
+      uniforms.resolution.value.x = renderer.domElement.width;
+      uniforms.resolution.value.y = renderer.domElement.height;
+    }
+    resize();
+    window.addEventListener('resize', resize, false);
+    setTimeout(resize, 300);
+
+    if (reduce){
+      resize(); renderer.render(scene, camera);
+    } else {
+      (function animate(){
+        requestAnimationFrame(animate);
+        uniforms.time.value += 0.05;
+        renderer.render(scene, camera);
+      })();
+    }
+  })();
+</script>
+</body>
+</html>
