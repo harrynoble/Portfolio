@@ -158,8 +158,12 @@
   .wa-btn svg { width: 20px; height: 20px; pointer-events: none; }
   .wa-btn:hover { transform: translateY(-2px); background: #20c25c; box-shadow: 0 18px 38px -18px rgba(37,211,102,.6); }
   .wa-btn:active { transform: translateY(0); }
+  .ig-btn { margin-top: 14px; display: flex; width: max-content; align-items: center; gap: 10px; padding: 15px 24px; border-radius: 12px; font-weight: 600; font-family: 'Archivo', sans-serif; font-size: 15px; color: #ffffff; background: #E1306C; border: none; cursor: pointer; transition: transform .25s var(--ease-smooth), box-shadow .3s var(--ease-smooth), background .3s ease; }
+  .ig-btn svg { width: 20px; height: 20px; pointer-events: none; }
+  .ig-btn:hover { transform: translateY(-2px); background: #d02b62; box-shadow: 0 18px 38px -18px rgba(225,48,108,.6); }
+  .ig-btn:active { transform: translateY(0); }
   .cta-stack { margin-top: 32px; display: inline-flex; flex-direction: column; align-items: stretch; gap: 16px; }
-  .cta-stack .wa-btn, .cta-stack .resume-btn { margin-top: 0; width: auto; justify-content: center; }
+  .cta-stack .wa-btn, .cta-stack .ig-btn, .cta-stack .resume-btn { margin-top: 0; width: auto; justify-content: center; }
   /* social icon row above the WhatsApp button — together span the button width */
   .social-row { display: flex; gap: 12px; width: 100%; }
   .soc { flex: 1; display: inline-flex; align-items: center; justify-content: center; height: 50px; border: 1px solid var(--border-strong); border-radius: 12px; background: var(--card); color: var(--muted); transition: color .3s var(--ease-smooth), border-color .3s var(--ease-smooth), transform .3s var(--ease-smooth), box-shadow .3s var(--ease-smooth); }
@@ -606,11 +610,41 @@
   .theme-toggle:active, .socials a:active, .card-expand:active, .proj-close:active { translate: 0 1px; }
   /* reveal entrance: opacity + transform animate together (kills the instant-pop flash); hover props kept */
   .reveal { transition: opacity .95s var(--ease-smooth), transform .95s var(--ease-smooth), color .35s var(--ease-smooth), background-color .35s var(--ease-smooth), background .35s var(--ease-smooth), border-color .35s var(--ease-smooth), box-shadow .35s var(--ease-smooth); }
-  /* currently building */
-  .building-card { max-width: 860px; border: 1px solid var(--border); background: var(--card); border-radius: 24px; padding: clamp(28px, 4vw, 44px); }
-  .live-dot { display: inline-block; vertical-align: middle; width: .34em; height: .34em; margin-right: .4em; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 0 rgba(34,197,94,.5); animation: liveBlink 2.6s ease-in-out infinite; }
-  .building-quote { font-family: var(--font-head); font-style: italic; font-weight: 600; font-size: clamp(19px, 2.4vw, 27px); line-height: 1.5; letter-spacing: -.01em; color: var(--text); border-left: 3px solid var(--accent); padding-left: 22px; max-width: 760px; }
-  @keyframes liveBlink { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,.45); } 50% { opacity: .35; box-shadow: 0 0 0 .26em rgba(34,197,94,0); } }
+  /* testimonials — draggable shuffle cards */
+  .tst-stage { display: flex; flex-direction: column; align-items: center; }
+  .tst-deck { position: relative; width: min(1000px, 94vw); height: clamp(340px, 50vh, 470px); margin: 6px auto 0; transform: translateX(-16px); touch-action: pan-y; transition: height .45s var(--ease-smooth); }
+  .tst-shuffle-card { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: clamp(48px, 5vw, 68px) clamp(36px, 4.4vw, 60px); border-radius: 28px; border: 1px solid var(--border); background: #000; box-shadow: 0 40px 120px -50px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.04); transition: transform .45s var(--ease-smooth), box-shadow .5s var(--ease-smooth), border-color .4s var(--ease-smooth); will-change: transform; touch-action: pan-y; -webkit-user-select: none; user-select: none; }
+  :root[data-theme="light"] .tst-shuffle-card { background: var(--card); box-shadow: 0 40px 120px -50px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.5); }
+  .tst-shuffle-card.dragging { transition: none; }
+  .tst-shuffle-card.is-front { cursor: grab; border-color: var(--border-strong); box-shadow: 0 48px 130px -46px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.05); }
+  :root[data-theme="light"] .tst-shuffle-card.is-front { box-shadow: 0 48px 130px -44px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.6); }
+  .tst-shuffle-card.is-front:active { cursor: grabbing; }
+  .tst-shuffle-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .tst-body { width: 100%; max-width: 840px; margin: 0 auto; display: grid; grid-template-columns: minmax(150px, 260px) 1fr; align-items: center; gap: 0; }
+  .tst-id { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; padding-right: clamp(32px, 4.6vw, 60px); }
+  .tst-main { min-width: 0; display: flex; flex-direction: column; gap: clamp(28px, 3.2vw, 40px); border-left: 1px solid var(--border); padding-left: clamp(34px, 4.8vw, 62px); }
+  .tst-avatar { justify-self: center; width: clamp(92px, 9vw, 120px); height: clamp(92px, 9vw, 120px); border-radius: 50%; display: grid; place-content: center; border: 1px solid var(--border-strong); background: rgba(0,68,255,.14); color: var(--accent); font-family: var(--font-head); font-weight: 700; font-size: clamp(30px, 3.2vw, 40px); letter-spacing: .02em; }
+  .tst-avatar svg { width: clamp(34px, 3.4vw, 44px); height: clamp(34px, 3.4vw, 44px); }
+  .tst-shuffle-quote { margin: 0; text-align: left; font-family: var(--font-head); font-style: normal; font-weight: 400; font-size: clamp(17px, 2vw, 24px); line-height: 1.75; letter-spacing: 0; color: var(--text); }
+  .tst-shuffle-author { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .tst-shuffle-name { display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-family: 'Archivo', sans-serif; font-weight: 700; font-size: clamp(16px, 1.5vw, 19px); color: var(--text); }
+  .tst-verified-badge { width: 19px; height: 19px; flex: none; }
+  .tst-verified-badge .seal { fill: var(--accent); }
+  .tst-verified-badge .tick { fill: none; stroke: #ffffff; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .tst-shuffle-role { font-family: 'JetBrains Mono', monospace; font-size: clamp(12px, 1.1vw, 13px); letter-spacing: .05em; color: var(--accent); }
+  .tst-links { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 14px; margin-top: 2px; }
+  .tst-link { display: inline-flex; align-items: center; justify-content: center; min-width: 190px; white-space: nowrap; gap: 8px; padding: 12px 22px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font-family: 'Archivo', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: color .3s var(--ease-smooth), border-color .3s var(--ease-smooth), background .3s var(--ease-smooth), transform .3s var(--ease-smooth); }
+  .tst-link:hover { border-color: var(--accent); background: var(--hover); transform: translateY(-2px); }
+  .tst-link.primary { background: var(--accent); border-color: var(--accent); color: #ffffff; }
+  .tst-link.primary:hover { background: var(--accent); border-color: var(--accent); }
+  .tst-link.instagram { background: #E1306C; border-color: #E1306C; color: #ffffff; }
+  .tst-link.instagram:hover { background: #E1306C; border-color: #E1306C; }
+  .tst-link svg { width: 16px; height: 16px; }
+  .tst-soon-body { display: flex; flex-direction: column; align-items: center; text-align: center; gap: clamp(22px, 2.8vw, 32px); }
+  .tst-soon-text { margin: 0; text-align: center; font-family: var(--font-head); font-style: italic; font-weight: 600; font-size: clamp(22px, 2.7vw, 34px); line-height: 1.4; color: var(--text); }
+  .tst-hint { margin-top: 28px; display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: .04em; color: var(--muted); }
+  .tst-hint svg { width: 15px; height: 15px; }
+  @media (max-width: 600px){ .tst-deck { width: 92vw; height: min(74vh, 580px); margin-top: 2px; transform: translateX(-10px); } .tst-shuffle-card { border-radius: 26px; padding: 48px 26px; } .tst-body { grid-template-columns: 1fr; gap: 24px; } .tst-id { padding-right: 0; } .tst-main { border-left: none; padding-left: 0; align-items: center; text-align: center; } .tst-shuffle-quote { text-align: center; font-size: clamp(16px, 4.4vw, 20px); } .tst-links { justify-content: center; } .tst-hint { margin-top: 22px; } }
   /* smooth cross-fade when switching light/dark (enabled after first paint so it doesn't fire on load) */
   html.theme-ready body { transition: background-color .55s cubic-bezier(.22,1,.36,1), color .55s cubic-bezier(.22,1,.36,1); }
   html.theme-ready .glass-bar { transition: background-color .55s cubic-bezier(.22,1,.36,1), box-shadow .55s cubic-bezier(.22,1,.36,1); }
@@ -927,12 +961,52 @@
     <div class="stack-end" aria-hidden="true"></div>
   </section>
 
-  <!-- CURRENTLY BUILDING -->
-  <section id="building" class="sec">
+  <!-- TESTIMONIALS -->
+  <section id="testimonials" class="sec">
     <div class="wrap">
-      <div class="sec-head reveal"><h2><span class="live-dot" aria-hidden="true"></span>Currently Building</h2><span class="line"></span></div>
-      <div class="building-card reveal" style="transition-delay:.06s">
-        <blockquote class="building-quote">"I'm currently building an interactive cellular automata playground featuring all 256 elementary rules and Conway's Game of Life."</blockquote>
+      <div class="sec-head reveal"><h2>What Clients Say</h2><span class="line"></span></div>
+      <div class="tst-stage reveal" style="transition-delay:.06s">
+        <div class="tst-deck" id="tst-deck" aria-label="Client testimonials — drag or tap the front card to shuffle">
+          <article class="tst-shuffle-card is-front" style="transform: translateX(0px); z-index:2;" tabindex="0">
+            <div class="tst-body">
+              <div class="tst-id">
+                <div class="tst-avatar" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/></svg>
+                </div>
+                <div class="tst-shuffle-author">
+                  <span class="tst-shuffle-name">Dr. Bivin Wilson<svg class="tst-verified-badge" role="img" aria-label="Verified" viewBox="0 0 24 24"><path class="seal" d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path class="tick" d="m9 12 2 2 4-4"/></svg></span>
+                  <span class="tst-shuffle-role">Cardiologist</span>
+                </div>
+              </div>
+              <div class="tst-main">
+                <p class="tst-shuffle-quote">&ldquo;Harry built exactly what I envisioned. The website is fast, professional, and easy for my patients to use. He was responsive throughout the process and delivered everything on time.&rdquo;</p>
+                <div class="tst-links">
+                  <a class="tst-link primary" data-magnetic href="https://drbivinwilson.in/" target="_blank" rel="noopener noreferrer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                    Visit the site
+                  </a>
+                  <a class="tst-link instagram" data-magnetic href="https://www.instagram.com/p/DaFBPo3GZDf/?igsh=MWptd2V1bnl0bmdnMA==" target="_blank" rel="noopener noreferrer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                    Instagram post
+                  </a>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="tst-shuffle-card" style="transform: translateX(34px); z-index:1;" tabindex="-1" aria-hidden="true">
+            <div class="tst-soon-body">
+              <p class="tst-soon-text">Be the next success story.</p>
+              <button type="button" class="tst-link primary" data-magnetic onclick="scrollToId('contact')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                Get in touch
+              </button>
+            </div>
+          </article>
+        </div>
+        <p class="tst-hint" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M5 12l5-5M5 12l5 5"/></svg>
+          Drag or tap the card to shuffle
+        </p>
       </div>
     </div>
   </section>
@@ -969,8 +1043,12 @@
             </a>
           </div>
           <a class="wa-btn" data-magnetic href="https://wa.me/918848241670" target="_blank" rel="noreferrer" aria-label="Message me on WhatsApp">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm0 1.67c2.2 0 4.27.86 5.83 2.42a8.2 8.2 0 0 1 2.42 5.82c0 4.54-3.7 8.24-8.25 8.24-1.52 0-3.01-.4-4.3-1.18l-.31-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.35c0-4.54 3.7-8.24 8.24-8.24Zm-4.51 4.4c-.21 0-.55.08-.84.39-.29.31-1.1 1.08-1.1 2.62 0 1.55 1.13 3.04 1.28 3.25.16.21 2.19 3.34 5.3 4.55.74.29 1.32.46 1.77.59.74.24 1.42.2 1.96.12.6-.09 1.84-.75 2.1-1.48.26-.73.26-1.35.18-1.48-.08-.13-.29-.21-.6-.37-.31-.16-1.84-.91-2.12-1.01-.29-.1-.5-.16-.71.16-.21.31-.81 1.01-.99 1.21-.18.21-.37.24-.68.08-.31-.16-1.31-.48-2.5-1.54-.92-.82-1.55-1.84-1.73-2.15-.18-.31-.02-.48.14-.63.14-.14.31-.36.47-.55.16-.18.21-.31.31-.52.1-.21.05-.39-.03-.55-.08-.16-.7-1.69-.96-2.31-.25-.6-.51-.52-.7-.53-.18-.01-.39-.01-.6-.01Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
             Message me on WhatsApp
+          </a>
+          <a class="ig-btn" data-magnetic href="https://www.instagram.com/studio.harrynoble?utm_source=qr&amp;igsh=MXZpbjd1YmtpaGhrYg%3D%3D" target="_blank" rel="noreferrer" aria-label="Message me on Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5.2"/><circle cx="12" cy="12" r="4"/><circle cx="17.6" cy="6.4" r="1.1" fill="currentColor" stroke="none"/></svg>
+            Message me on Instagram
           </a>
           <a class="resume-btn" data-magnetic href="assets/Harry_Noble_Resume.pdf" target="_blank" rel="noopener noreferrer">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1512,6 +1590,97 @@
     document.querySelectorAll('img.img-fade').forEach(img => {
       if (img.complete) img.classList.add('loaded');
       else { img.addEventListener('load', () => img.classList.add('loaded')); img.addEventListener('error', () => img.classList.add('loaded')); }
+    });
+  })();
+
+  /* ---------- testimonials: draggable shuffle cards ---------- */
+  (function(){
+    var deck = document.getElementById('tst-deck');
+    if (!deck) return;
+    var order = Array.prototype.slice.call(deck.querySelectorAll('.tst-shuffle-card'));
+    if (!order.length) return;
+    var THRESHOLD = 120;
+
+    function layout(){
+      order.forEach(function(card, i){
+        var front = i === 0;
+        card.style.zIndex = String(order.length - i);
+        card.classList.toggle('is-front', front);
+        card.inert = !front;
+        if (front){
+          card.style.transform = 'translateX(0px)';
+          card.setAttribute('tabindex', '0');
+          card.setAttribute('aria-hidden', 'false');
+        } else {
+          var off = 34 + (i - 1) * 26;
+          card.style.transform = 'translateX(' + off + 'px)';
+          card.setAttribute('tabindex', '-1');
+          card.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }
+    function sizeDeck(){
+      var cs = getComputedStyle(order[0]);
+      var pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+      var h = 0;
+      order.forEach(function(c){ var inner = c.firstElementChild; if (inner) h = Math.max(h, inner.offsetHeight); });
+      if (h) deck.style.height = Math.round(h + pad) + 'px';
+    }
+    function advance(){ order.push(order.shift()); layout(); }
+    layout();
+    sizeDeck();
+    window.addEventListener('load', sizeDeck);
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(sizeDeck); }
+    var rsz; window.addEventListener('resize', function(){ clearTimeout(rsz); rsz = setTimeout(sizeDeck, 120); });
+
+    var pending = false, dragging = false, startX = 0, startY = 0, dx = 0, activeCard = null, capId = null, moved = false;
+    function onDown(e){
+      if (e.target.closest && e.target.closest('a, button')) return;
+      var front = order[0];
+      var card = e.target.closest ? e.target.closest('.tst-shuffle-card') : null;
+      if (!card || card !== front) return;
+      pending = true; dragging = false; moved = false; activeCard = front; startX = e.clientX; startY = e.clientY; dx = 0; capId = e.pointerId;
+    }
+    function onMove(e){
+      if (!activeCard) return;
+      var ddx = e.clientX - startX, ddy = e.clientY - startY;
+      if (pending && !dragging){
+        if (Math.abs(ddx) < 6 && Math.abs(ddy) < 6) return;
+        if (Math.abs(ddy) > Math.abs(ddx)){ pending = false; activeCard = null; return; } // vertical → let the page scroll
+        pending = false; dragging = true; moved = true;                                    // horizontal → take over as a drag
+        activeCard.classList.add('dragging');
+        try { activeCard.setPointerCapture(capId); } catch (_){}
+      }
+      if (dragging){ dx = ddx; activeCard.style.transform = 'translateX(' + dx + 'px)'; }
+    }
+    function onUp(){
+      pending = false;
+      if (!dragging){ activeCard = null; return; }
+      dragging = false;
+      var card = activeCard; activeCard = null;
+      if (card){
+        card.classList.remove('dragging');
+        try { card.releasePointerCapture(capId); } catch (_){}
+        if (Math.abs(dx) > THRESHOLD) advance(); else layout();
+      }
+      dx = 0;
+    }
+    deck.addEventListener('pointerdown', onDown);
+    window.addEventListener('pointermove', onMove, { passive: true });
+    deck.addEventListener('touchmove', function(e){ if (dragging) e.preventDefault(); }, { passive: false });
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+
+    deck.addEventListener('click', function(e){
+      if (e.target.closest && e.target.closest('a, button')) return;
+      if (moved){ moved = false; return; }
+      if (e.target.closest && e.target.closest('.tst-shuffle-card') === order[0]) advance();
+    });
+    deck.addEventListener('keydown', function(e){
+      if (e.target.closest && e.target.closest('a, button')) return;
+      if ((e.key === 'Enter' || e.key === ' ') && e.target.closest && e.target.closest('.tst-shuffle-card') === order[0]){
+        e.preventDefault(); advance();
+      }
     });
   })();
 
